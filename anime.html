@@ -3,35 +3,121 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spill - Funny</title>
-  <link rel="stylesheet" href="intro.css">
+  <title>Spill - Anime</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="intro-active">
-
-  <div id="intro-screen">
-    <div class="intro-content">
-
-      <!-- Logo -->
-      <img src="images/spill-logo.jpeg" alt="Spill Logo" class="logo">
-
-      <!-- Title -->
-      <h1>Spill - Anime</h1>
-
-      <!-- Message -->
-      <p>
-        This part of <strong>Spill</strong> is still under construction.<br><br>
-        Check back regularly for updates.<br><br>
-        You can also help support the Spill community to maintain and improve this site.
-      </p>
-
-      <!-- Buttons -->
-      <div class="intro-buttons">
-        <button id="enter-btn" onclick="window.location.href='donate.html'">💙 Donate</button>
-        <button id="leave-btn" onclick="window.location.href='spill.html'">← Back</button>
+<body>
+ 
+  <!-- Header -->
+  <header class="header">
+    <div class="avatar">
+      <img id="user-avatar" src="" alt="Avatar">
+      <span id="username"></span>
+    </div>
+    <button id="spill-button">Spill Something</button>
+    <button id="theme-toggle">🌙</button>
+  </header>
+ 
+  <!-- Spill Modal -->
+  <div id="spill-modal" class="modal">
+    <div class="modal-content">
+      <h3>What do you want to spill?</h3>
+      <textarea id="spill-text" placeholder="Type something..."></textarea>
+      <input type="file" id="media-input" accept="image/*,video/*">
+      <div class="modal-actions">
+        <button id="post-btn">Post</button>
+        <button id="close-btn">Cancel</button>
       </div>
-
     </div>
   </div>
-
+ 
+  <!-- Categories -->
+  <div class="categories">
+    <button onclick="window.location.href='spill.html'">All</button>
+    <button onclick="window.location.href='funny.html'">Funny</button>
+    <button class="active" onclick="window.location.href='anime.html'">Anime</button>
+    <button onclick="window.location.href='rant.html'">Rant</button>
+    <button onclick="window.location.href='advice.html'">Advice</button>
+    <button onclick="window.location.href='highschool.html'">HighSchool</button>
+    <button onclick="window.location.href='teenvibes.html'">TeenVibes</button>
+    <button onclick="window.location.href='adult.html'">Adult</button>
+    <button onclick="window.location.href='sports.html'">Sports</button>
+    <button onclick="window.location.href='politics.html'">Politics</button>
+    <button onclick="window.location.href='gaming.html'">Gaming</button>
+    <button onclick="window.location.href='memes.html'">Memes</button>
+    <button onclick="window.location.href='weapons.html'">Weapons</button>
+    <button onclick="window.location.href='religion.html'">Religion</button>
+  </div>
+ 
+  <!-- Feed (filtered to Anime category) -->
+  <main class="feed" id="feed">
+    <!-- Anime posts injected here via JS -->
+  </main>
+ 
+  <!-- User Setup Script -->
+  <script>
+    const avatars = [
+      "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
+      "https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka",
+      "https://api.dicebear.com/7.x/avataaars/svg?seed=Mia",
+      "https://api.dicebear.com/7.x/avataaars/svg?seed=Zoe",
+      "https://api.dicebear.com/7.x/avataaars/svg?seed=Sam",
+      "https://api.dicebear.com/7.x/avataaars/svg?seed=Luna",
+      "https://api.dicebear.com/7.x/avataaars/svg?seed=Nova",
+      "https://api.dicebear.com/7.x/avataaars/svg?seed=Aria"
+    ];
+ 
+    const adjectives = ["Silent", "Crazy", "Happy", "Blue", "Electric"];
+    const nouns      = ["Penguin", "Tiger", "Banana", "Rocket", "Wizard"];
+ 
+    let username = localStorage.getItem("spillUsername");
+    if (!username) {
+      const randomNumber = Math.floor(Math.random() * 100);
+      username =
+        adjectives[Math.floor(Math.random() * adjectives.length)] +
+        nouns[Math.floor(Math.random() * nouns.length)] +
+        randomNumber;
+      localStorage.setItem("spillUsername", username);
+    }
+ 
+    const usernameElem = document.getElementById("username");
+    if (usernameElem) usernameElem.textContent = username;
+ 
+    const avatarElem = document.getElementById("user-avatar");
+    if (avatarElem) {
+      let userAvatar = localStorage.getItem("spillAvatar");
+      if (!userAvatar) {
+        userAvatar = avatars[Math.floor(Math.random() * avatars.length)];
+        localStorage.setItem("spillAvatar", userAvatar);
+      }
+      avatarElem.src = userAvatar;
+    }
+ 
+    // Pass category to script.js
+    window.SPILL_CATEGORY = "anime";
+  </script>
+ 
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
+ 
+  <script>
+    const firebaseConfig = {
+      apiKey:            "AIzaSyCFRl1zYkLw5Dvm-T67oUbRp8LaZxDU35o",
+      authDomain:        "spill-app-28f9f.firebaseapp.com",
+      projectId:         "spill-app-28f9f",
+      storageBucket:     "spill-app-28f9f.firebasestorage.app",
+      messagingSenderId: "171346032455",
+      appId:             "1:171346032455:web:bda990576e5e3454fcbe62",
+      measurementId:     "G-CD92Z0NPDT"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db      = firebase.firestore();
+    const storage = firebase.storage();
+  </script>
+ 
+  <script src="script.js"></script>
+ 
 </body>
 </html>

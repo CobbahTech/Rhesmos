@@ -6,88 +6,90 @@
   <title>Spill - Donate</title>
   <link rel="stylesheet" href="intro.css">
 </head>
-
+ 
 <body class="intro-active">
-
+ 
   <div id="intro-screen">
     <div class="intro-content">
-
+ 
       <!-- Logo -->
       <img src="images/spill-logo.jpeg" alt="Spill Logo" class="logo">
-
+ 
       <!-- Title -->
-      <h1>Support Spill Community</h1>
-
+      <h1>Support Spill</h1>
+ 
       <!-- Message -->
       <p>
         Thank you for helping support the <strong>Spill</strong> community!<br><br>
         Your contributions help us keep the platform running and improve it for everyone.<br><br>
         All donations are processed securely via Mobile Money.
       </p>
-
+ 
       <!-- Buttons -->
       <div class="intro-buttons">
         <button id="donate-btn">Donate with Mobile Money</button>
         <button id="leave-btn">← Back to Spill</button>
       </div>
-
+ 
     </div>
   </div>
-
+ 
   <!-- Paystack Script -->
   <script src="https://js.paystack.co/v1/inline.js"></script>
-
-  <!-- Donation Script -->
+ 
   <script>
     const donateBtn = document.getElementById("donate-btn");
-    const leaveBtn = document.getElementById("leave-btn");
-
+    const leaveBtn  = document.getElementById("leave-btn");
+ 
     // Back button
     leaveBtn.addEventListener("click", () => {
       window.location.href = "spill.html";
     });
-
-    // Donate button with dynamic amount + username@spill.com
+ 
+    // Donate button
     donateBtn.addEventListener("click", () => {
-      
+ 
       // Get username from localStorage
-      let username = localStorage.getItem("spillUsername") || "anonymous";
-      let userEmail = `${username.toLowerCase()}@spill.com`;
-
-      // Ask user for donation amount (minimum ₵1)
-      let amountGHS = prompt("How much would you like to donate?\nMinimum: ₵1", "5");
-
+      const username  = localStorage.getItem("spillUsername") || "anonymous";
+      const userEmail = `${username.toLowerCase()}@spill.com`;
+ 
+      // Ask user for donation amount
+      const input = prompt("How much would you like to donate?\nMinimum: ₵1", "5");
+ 
+      // User cancelled the prompt
+      if (input === null) return;
+ 
+      const amountGHS = parseFloat(input);
+ 
       // Validate input
-      amountGHS = parseFloat(amountGHS);
-      
-      if (!amountGHS || amountGHS < 1) {
+      if (isNaN(amountGHS) || amountGHS < 1) {
         alert("❌ Minimum donation amount is ₵1. Please try again.");
         return;
       }
-
+ 
       // Convert to pesewas (Paystack requirement)
       const amountInPesewas = Math.round(amountGHS * 100);
-
+ 
       // Paystack setup
-      let handler = PaystackPop.setup({
-        key: "pk_test_545538f0a73ef3bc85343502fac60608e1743edb",   // ← CHANGE TO LIVE KEY WHEN READY
-        email: userEmail,
-        amount: amountInPesewas,
+      const handler = PaystackPop.setup({
+        key:      "pk_test_545538f0a73ef3bc85343502fac60608e1743edb", // ← Change to live key when ready
+        email:    userEmail,
+        amount:   amountInPesewas,
         currency: "GHS",
-        channels: ['mobile_money'],   // Only Mobile Money
-
+        channels: ["mobile_money"],
+ 
         callback: function(response) {
-          alert(`✅ Thank you!\n\nDonation of ₵${amountGHS} was successful!\nReference: ${response.reference}`);
+          alert(`✅ Thank you!\n\nDonation of ₵${amountGHS.toFixed(2)} was successful!\nReference: ${response.reference}`);
         },
-
+ 
         onClose: function() {
-          alert("❌ Payment was cancelled.");
+          alert("Payment window closed. No charge was made.");
         }
       });
-
+ 
       handler.openIframe();
     });
   </script>
-
+ 
 </body>
 </html>

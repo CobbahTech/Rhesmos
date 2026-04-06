@@ -1,4 +1,11 @@
 /* =========================
+   GLOBAL RESET
+========================= */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+ 
+/* =========================
    INTRO SCREEN
 ========================= */
 body {
@@ -7,13 +14,13 @@ body {
   background: #0f1419;
   color: #ffffff;
 }
-
+ 
 /* Prevent body scrolling on intro */
 body.intro-active {
   overflow: hidden;
   height: 100vh;
 }
-
+ 
 #intro-screen {
   position: fixed;
   top: 0;
@@ -23,20 +30,31 @@ body.intro-active {
   display: flex;
   align-items: center;
   justify-content: center;
+  opacity: 1;
+  transition: opacity 0.5s ease;
 }
-
+ 
+#intro-screen.fade-out {
+  opacity: 0;
+}
+ 
 .intro-content {
   max-width: 500px;
+  width: 90%;
   text-align: center;
   padding: 20px;
 }
-
+ 
+/* =========================
+   LOGO
+========================= */
 .logo {
   width: 120px;
   margin-bottom: 20px;
+  border-radius: 50%;
   animation: logoEnter 0.6s ease forwards;
 }
-
+ 
 @keyframes logoEnter {
   from {
     opacity: 0;
@@ -47,63 +65,71 @@ body.intro-active {
     transform: scale(1);
   }
 }
-
+ 
+/* =========================
+   TYPOGRAPHY
+========================= */
 .intro-content h1 {
   font-size: 28px;
   margin-bottom: 15px;
+  color: #1d9bf0;
 }
-
+ 
 .intro-content p {
   color: #cfd9de;
   margin-bottom: 10px;
-  line-height: 1.5;
+  line-height: 1.6;
 }
-
+ 
 .warning {
   font-size: 14px;
   color: #8899a6;
 }
-
+ 
+/* =========================
+   BUTTONS
+========================= */
 .intro-buttons {
   margin-top: 20px;
   display: flex;
   justify-content: center;
   gap: 15px;
+  flex-wrap: wrap;
 }
-
-#enter-btn {
+ 
+/* Primary action button — Enter / Donate */
+#enter-btn,
+#donate-btn {
   background: #1d9bf0;
   border: none;
-  padding: 10px 18px;
+  padding: 10px 20px;
   border-radius: 999px;
   color: white;
   font-weight: 600;
+  font-size: 15px;
   cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
-
-#enter-btn:hover {
+ 
+#enter-btn:hover,
+#donate-btn:hover {
   background: #1a8cd8;
+  transform: scale(1.03);
 }
-
+ 
+/* Secondary action button — Leave / Back */
 #leave-btn {
   background: transparent;
   border: 1px solid #444;
-  padding: 10px 18px;
+  padding: 10px 20px;
   border-radius: 999px;
   color: #ccc;
+  font-size: 15px;
   cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
 }
-
+ 
 #leave-btn:hover {
   background: #222;
+  color: #fff;
 }
-
-#intro-screen {
-  opacity: 1;
-  transition: opacity 0.5s ease;
-}
-
-#intro-screen.fade-out {
-  opacity: 0;
-}
-
