@@ -28,14 +28,13 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("spillAvatar", userAvatar);
   }
  
-  // Display username & avatar in header (null-safe)
-  const usernameEl  = document.getElementById("username");
-  const avatarEl    = document.getElementById("user-avatar");
+  const usernameEl = document.getElementById("username");
+  const avatarEl   = document.getElementById("user-avatar");
   if (usernameEl) usernameEl.textContent = username;
   if (avatarEl)   avatarEl.src = userAvatar;
  
   // =========================
-  // DOM ELEMENTS (null-safe)
+  // DOM ELEMENTS
   // =========================
   const feed        = document.getElementById("feed");
   const modal       = document.getElementById("spill-modal");
@@ -50,27 +49,37 @@ document.addEventListener("DOMContentLoaded", () => {
   // HELPERS
   // =========================
  
-  // Sanitize text to prevent XSS
   function escapeHTML(str) {
+    if (!str) return "";
     const div = document.createElement("div");
-    div.appendChild(document.createTextNode(str));
+    div.appendChild(document.createTextNode(String(str)));
     return div.innerHTML;
   }
  
-  // Format Firestore timestamp into readable time
+  // ✅ KEY FIX: createdAt is NULL on the first local snapshot after posting
+  // (Firestore hasn't confirmed the server timestamp yet).
+  // We must check typeof .toDate before calling it — never assume it's a Timestamp.
   function formatTime(timestamp) {
     if (!timestamp) return "Just now";
-    const date = timestamp.toDate();
-    const now  = new Date();
-    const diff = Math.floor((now - date) / 1000); // seconds
  
-    if (diff < 60)   return "Just now";
-    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    let date;
+    if (typeof timestamp.toDate === "function") {
+      date = timestamp.toDate();       // Firestore Timestamp
+    } else if (timestamp instanceof Date) {
+      date = timestamp;                // plain JS Date
+    } else {
+      return "Just now";               // unknown — safe fallback
+    }
+ 
+    const now  = new Date();
+    const diff = Math.floor((now - date) / 1000);
+ 
+    if (diff < 60)    return "Just now";
+    if (diff < 3600)  return `${Math.floor(diff / 60)}m ago`;
     if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
     return date.toLocaleDateString();
   }
  
-  // Build safe media HTML
   function buildMediaHTML(url) {
     if (!url) return "";
     const safeURL = escapeHTML(url);
@@ -89,7 +98,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (file) {
       try {
         if (postBtn) { postBtn.textContent = "Uploading..."; postBtn.disabled = true; }
- 
         const storageRef = firebase.storage().ref(`spills/${Date.now()}_${file.name}`);
         await storageRef.put(file);
         mediaURL = await storageRef.getDownloadURL();
@@ -101,12 +109,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
  
-    // Determine category from page context (set in each category page)
     const category = window.SPILL_CATEGORY || "general";
  
     const postData = {
       username:  username,
-      avatar:    userAvatar,            // ✅ store author's avatar with post
+      avatar:    userAvatar,
       text:      text || "",
       mediaURL:  mediaURL,
       category:  category,
@@ -122,20 +129,24 @@ document.addEventListener("DOMContentLoaded", () => {
       await db.collection("posts").add(postData);
     } catch (error) {
       console.error("Error posting:", error);
-      alert("Failed to post. Please check your connection.");
+      alert("Failed to post. Check your Firebase Firestore security rules.");
     }
   }
  
   // =========================
-  // RENDER A SINGLE POST NODE
+  // RENDER A SINGLE POST
   // =========================
   function renderPost(doc) {
     const data   = doc.data();
     const postId = doc.id;
  
-    // Client-side expiry guard
-    if (data.expiresAt && data.expiresAt.toDate() < new Date()) {
-      doc.ref.delete();
+    // ✅ KEY FIX: Only delete expired posts if expiresAt is a real Timestamp (not null)
+    if (
+      data.expiresAt &&
+      typeof data.expiresAt.toDate === "function" &&
+      data.expiresAt.toDate() < new Date()
+    ) {
+      doc.ref.delete().catch(() => {}); // silently ignore permission errors
       return null;
     }
  
@@ -143,7 +154,6 @@ document.addEventListener("DOMContentLoaded", () => {
     postEl.className = "post";
     postEl.dataset.id = postId;
  
-    // Use the stored avatar for the post author, fallback to a placeholder
     const authorAvatar = escapeHTML(data.avatar || "images/1.jpg");
  
     postEl.innerHTML = `
@@ -157,7 +167,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ${buildMediaHTML(data.mediaURL)}
       </div>
       <div class="post-actions">
-        <button class="like-btn"    data-id="${postId}">❤️ <span class="like-count">${data.likes || 0}</span></button>
+        <button class="like-btn" data-id="${postId}">❤️ <span class="like-count">${data.likes || 0}</span></button>
         <button class="comment-btn" data-id="${postId}">💬 Comments</button>
       </div>
       <div class="comment-section" data-id="${postId}" style="display:none;margin-top:10px;">
@@ -173,20 +183,24 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     `;
  
-    // ── Like button ──
+    // Like
     postEl.querySelector(".like-btn").addEventListener("click", async () => {
-      const postRef = db.collection("posts").doc(postId);
-      const snap    = await postRef.get();
-      if (!snap.exists) return;
-      const d = snap.data();
-      if (d.likedBy && d.likedBy.includes(username)) return; // already liked
-      await postRef.update({
-        likes:   firebase.firestore.FieldValue.increment(1),
-        likedBy: firebase.firestore.FieldValue.arrayUnion(username)
-      });
+      try {
+        const postRef = db.collection("posts").doc(postId);
+        const snap    = await postRef.get();
+        if (!snap.exists) return;
+        const d = snap.data();
+        if (d.likedBy && d.likedBy.includes(username)) return;
+        await postRef.update({
+          likes:   firebase.firestore.FieldValue.increment(1),
+          likedBy: firebase.firestore.FieldValue.arrayUnion(username)
+        });
+      } catch (err) {
+        console.error("Like error:", err);
+      }
     });
  
-    // ── Comment toggle ──
+    // Comment toggle
     postEl.querySelector(".comment-btn").addEventListener("click", () => {
       const section = postEl.querySelector(".comment-section");
       const isOpen  = section.style.display !== "none";
@@ -194,22 +208,23 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!isOpen) loadComments(postId, postEl.querySelector(".comments-list"));
     });
  
-    // ── Submit comment ──
+    // Submit comment
     postEl.querySelector(".submit-comment").addEventListener("click", async () => {
       const input       = postEl.querySelector(".comment-input");
       const commentText = input.value.trim();
       if (!commentText) return;
- 
-      await db.collection("posts").doc(postId).collection("comments").add({
-        username:  username,
-        avatar:    userAvatar,
-        text:      commentText,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
- 
-      input.value = "";
-      // Reload comments after posting
-      loadComments(postId, postEl.querySelector(".comments-list"));
+      try {
+        await db.collection("posts").doc(postId).collection("comments").add({
+          username:  username,
+          avatar:    userAvatar,
+          text:      commentText,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        input.value = "";
+        loadComments(postId, postEl.querySelector(".comments-list"));
+      } catch (err) {
+        console.error("Comment error:", err);
+      }
     });
  
     return postEl;
@@ -231,13 +246,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         snap.forEach((doc) => {
           const c = doc.data();
-          const commentEl = document.createElement("div");
-          commentEl.style.cssText = `
-            display:flex;gap:8px;align-items:flex-start;
-            margin-bottom:8px;padding:8px;
-            background:var(--bg-color);border-radius:8px;
-          `;
-          commentEl.innerHTML = `
+          const el = document.createElement("div");
+          el.style.cssText = `display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;padding:8px;background:var(--bg-color);border-radius:8px;`;
+          el.innerHTML = `
             <img src="${escapeHTML(c.avatar || "images/1.jpg")}" alt="Avatar"
               style="width:28px;height:28px;border-radius:50%;object-fit:cover;">
             <div>
@@ -245,41 +256,32 @@ document.addEventListener("DOMContentLoaded", () => {
               <p style="margin:2px 0 0;font-size:14px;color:var(--text-color);">${escapeHTML(c.text)}</p>
             </div>
           `;
-          listEl.appendChild(commentEl);
+          listEl.appendChild(el);
         });
       })
-      .catch((err) => console.error("Error loading comments:", err));
+      .catch((err) => console.error("Comments load error:", err));
   }
  
   // =========================
-  // LOAD & DISPLAY POSTS (Real-time)
+  // LOAD POSTS (Real-time)
   // =========================
   function loadPosts() {
     if (!feed) return;
  
-    // Filter by category if set (e.g. on anime.html, window.SPILL_CATEGORY = "anime")
     const category = window.SPILL_CATEGORY || null;
- 
     let query = db.collection("posts").orderBy("createdAt", "desc");
-    if (category) {
-      query = query.where("category", "==", category);
-    }
+    if (category) query = query.where("category", "==", category);
  
     query.onSnapshot((snapshot) => {
-      // Use a document fragment to avoid layout thrash
       const fragment = document.createDocumentFragment();
       let hasPost = false;
  
       snapshot.forEach((doc) => {
         const postEl = renderPost(doc);
-        if (postEl) {
-          fragment.appendChild(postEl);
-          hasPost = true;
-        }
+        if (postEl) { fragment.appendChild(postEl); hasPost = true; }
       });
  
       feed.innerHTML = "";
- 
       if (!hasPost) {
         const empty = document.createElement("p");
         empty.style.cssText = "text-align:center;color:var(--muted);margin-top:40px;";
@@ -290,34 +292,29 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }, (error) => {
       console.error("Snapshot error:", error);
+      if (feed && error.code === "permission-denied") {
+        feed.innerHTML = `
+          <p style="text-align:center;color:var(--muted);margin-top:40px;">
+            ⚠️ Unable to load posts — Firebase rules are blocking access.<br>
+            <small>Go to Firebase Console → Firestore → Rules and update them.</small>
+          </p>`;
+      }
     });
   }
  
   // =========================
-  // MODAL LOGIC
+  // MODAL
   // =========================
   if (openBtn)  openBtn.addEventListener("click",  () => modal && modal.classList.add("active"));
   if (closeBtn) closeBtn.addEventListener("click", () => modal && modal.classList.remove("active"));
- 
-  // Close modal on backdrop click
-  if (modal) {
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) modal.classList.remove("active");
-    });
-  }
+  if (modal)    modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.remove("active"); });
  
   if (postBtn) {
     postBtn.addEventListener("click", async () => {
       const text = textInput ? textInput.value.trim() : "";
       const file = mediaInput ? mediaInput.files[0] : null;
- 
-      if (!text && !file) {
-        alert("Please write something or upload media before spilling.");
-        return;
-      }
- 
+      if (!text && !file) { alert("Please write something or upload media before spilling."); return; }
       await createPost(text, file);
- 
       if (textInput)  textInput.value  = "";
       if (mediaInput) mediaInput.value = "";
       if (modal)      modal.classList.remove("active");
@@ -342,7 +339,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
  
   // =========================
-  // INITIALIZE
+  // INIT
   // =========================
   loadPosts();
  
