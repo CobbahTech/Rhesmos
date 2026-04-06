@@ -33,30 +33,27 @@
  
   <!-- Categories -->
   <div class="categories">
-    <button id="all-btn"        onclick="window.location.href='spill.html'">All</button>
-    <button id="funny-btn"      onclick="window.location.href='funny.html'">Funny</button>
-    <button id="anime-btn"      onclick="window.location.href='anime.html'">Anime</button>
-    <button id="rant-btn"       onclick="window.location.href='rant.html'">Rant</button>
-    <button id="advice-btn"     onclick="window.location.href='advice.html'">Advice</button>
-    <button id="highschool-btn" onclick="window.location.href='highschool.html'">HighSchool</button>
-    <button id="teenvibes-btn"  onclick="window.location.href='teenvibes.html'">TeenVibes</button>
-    <button id="adult-btn"      onclick="window.location.href='adult.html'">Adult</button>
-    <button id="sports-btn"     onclick="window.location.href='sports.html'">Sports</button>
-    <button id="politics-btn"   onclick="window.location.href='politics.html'">Politics</button>
-    <button id="gaming-btn"     onclick="window.location.href='gaming.html'">Gaming</button>
-    <button id="memes-btn"      onclick="window.location.href='memes.html'">Memes</button>
-    <button id="weapons-btn"    onclick="window.location.href='weapons.html'">Weapons</button>
-    <button id="religion-btn"   onclick="window.location.href='religion.html'">Religion</button>
+    <button class="active"       onclick="window.location.href='spill.html'">All</button>
+    <button onclick="window.location.href='funny.html'">Funny</button>
+    <button onclick="window.location.href='anime.html'">Anime</button>
+    <button onclick="window.location.href='rant.html'">Rant</button>
+    <button onclick="window.location.href='advice.html'">Advice</button>
+    <button onclick="window.location.href='highschool.html'">HighSchool</button>
+    <button onclick="window.location.href='teenvibes.html'">TeenVibes</button>
+    <button onclick="window.location.href='adult.html'">Adult</button>
+    <button onclick="window.location.href='sports.html'">Sports</button>
+    <button onclick="window.location.href='politics.html'">Politics</button>
+    <button onclick="window.location.href='gaming.html'">Gaming</button>
+    <button onclick="window.location.href='memes.html'">Memes</button>
+    <button onclick="window.location.href='weapons.html'">Weapons</button>
+    <button onclick="window.location.href='religion.html'">Religion</button>
   </div>
  
   <!-- Feed -->
-  <main class="feed" id="feed">
-    <!-- Individual posts will be injected here via JS -->
-  </main>
+  <main class="feed" id="feed"></main>
  
-  <!-- User Setup Script -->
+  <!-- User Setup -->
   <script>
-    // Predefined avatar list (using DiceBear API for random avatars)
     const avatars = [
       "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
       "https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka",
@@ -68,11 +65,9 @@
       "https://api.dicebear.com/7.x/avataaars/svg?seed=Aria"
     ];
  
-    // USERNAME SETUP
     const adjectives = ["Silent", "Crazy", "Happy", "Blue", "Electric"];
     const nouns      = ["Penguin", "Tiger", "Banana", "Rocket", "Wizard"];
  
-    // Get or generate username
     let username = localStorage.getItem("spillUsername");
     if (!username) {
       const randomNumber = Math.floor(Math.random() * 100);
@@ -83,11 +78,9 @@
       localStorage.setItem("spillUsername", username);
     }
  
-    // Display username in header
     const usernameElem = document.getElementById("username");
     if (usernameElem) usernameElem.textContent = username;
  
-    // Get or generate avatar
     const avatarElem = document.getElementById("user-avatar");
     if (avatarElem) {
       let userAvatar = localStorage.getItem("spillAvatar");
@@ -105,7 +98,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
  
   <script>
-    // Firebase Config
     const firebaseConfig = {
       apiKey:            "AIzaSyCFRl1zYkLw5Dvm-T67oUbRp8LaZxDU35o",
       authDomain:        "spill-app-28f9f.firebaseapp.com",
@@ -115,14 +107,11 @@
       appId:             "1:171346032455:web:bda990576e5e3454fcbe62",
       measurementId:     "G-CD92Z0NPDT"
     };
- 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db      = firebase.firestore();
     const storage = firebase.storage();
   </script>
  
-  <!-- App Script (loaded once) -->
   <script src="script.js"></script>
  
 </body>
