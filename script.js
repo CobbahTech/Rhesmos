@@ -9,8 +9,20 @@ document.addEventListener("DOMContentLoaded", () => {
   // =========================
   // USER SETUP (handled in spill.html)
   // =========================
-  const username   = localStorage.getItem("spillUsername");
-  const userAvatar = localStorage.getItem("spillAvatar");
+  const username = localStorage.getItem("spillUsername");
+  let userAvatar = localStorage.getItem("spillAvatar");
+ 
+  // If saved avatar is a local file path (not a full URL), discard it
+  if (userAvatar && !userAvatar.startsWith("http")) {
+    localStorage.removeItem("spillAvatar");
+    userAvatar = null;
+  }
+ 
+  // Generate fresh DiceBear avatar if none exists
+  if (!userAvatar && username) {
+    userAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(username)}`;
+    localStorage.setItem("spillAvatar", userAvatar);
+  }
  
   const usernameEl = document.getElementById("username");
   const avatarEl   = document.getElementById("user-avatar");
