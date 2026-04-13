@@ -128,7 +128,6 @@ document.addEventListener("DOMContentLoaded", () => {
     postEl.className = "post";
     postEl.dataset.id = postId;
  
-    // Fallback avatar uses the same DiceBear style, seeded by username
     const authorAvatar = escapeHTML(
       data.avatar ||
       `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(data.username || "anon")}`
@@ -146,7 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
       <div class="post-actions">
         <button class="like-btn" data-id="${postId}">❤️ <span class="like-count">${data.likes || 0}</span></button>
-        <button class="comment-btn" data-id="${postId}">💬 Comments</button>
+        <button class="comment-btn" data-id="${postId}">💬 <span class="comment-count">0</span></button>
       </div>
       <div class="comment-section" data-id="${postId}" style="display:none;margin-top:10px;">
         <div class="comments-list" data-id="${postId}"></div>
@@ -200,12 +199,29 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         input.value = "";
         loadComments(postId, postEl.querySelector(".comments-list"));
+        loadCommentCount(postId, postEl);
       } catch (err) {
         console.error("Comment error:", err);
       }
     });
  
+    // Load comment count on render
+    loadCommentCount(postId, postEl);
+ 
     return postEl;
+  }
+ 
+  // =========================
+  // COMMENT COUNT
+  // =========================
+  function loadCommentCount(postId, postEl) {
+    db.collection("posts").doc(postId).collection("comments")
+      .get()
+      .then(snap => {
+        const countEl = postEl.querySelector(".comment-count");
+        if (countEl) countEl.textContent = snap.size;
+      })
+      .catch(() => {});
   }
  
   // =========================
@@ -224,7 +240,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         snap.forEach((doc) => {
           const c = doc.data();
-          // Fallback avatar uses DiceBear seeded by commenter's username
           const commentAvatar = escapeHTML(
             c.avatar ||
             `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(c.username || "anon")}`
