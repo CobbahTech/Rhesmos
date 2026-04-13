@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // =========================
   // CLOUDINARY CONFIG
   // =========================
-  const CLOUDINARY_CLOUD_NAME  = "dextyw0r3";
+  const CLOUDINARY_CLOUD_NAME    = "dextyw0r3";
   const CLOUDINARY_UPLOAD_PRESET = "fb62qodk";
  
   // =========================
@@ -173,7 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <button class="like-btn" data-id="${postId}">❤️ <span class="like-count">${data.likes || 0}</span></button>
         <button class="comment-btn" data-id="${postId}">💬 <span class="comment-count">0</span></button>
       </div>
-      <div class="comment-section" data-id="${postId}" style="display:none;margin-top:10px;">
+      <div class="comment-section" data-id="${postId}" style="margin-top:10px;">
         <div class="comments-list" data-id="${postId}"></div>
         <div style="display:flex;gap:8px;margin-top:8px;">
           <input type="text" class="comment-input" placeholder="Write a comment..." data-id="${postId}"
@@ -203,11 +203,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
  
-    // Comment toggle
+    // Comment toggle — smooth open/close via CSS class
     postEl.querySelector(".comment-btn").addEventListener("click", () => {
       const section = postEl.querySelector(".comment-section");
-      const isOpen  = section.style.display !== "none";
-      section.style.display = isOpen ? "none" : "block";
+      const isOpen  = section.classList.contains("open");
+      section.classList.toggle("open");
       if (!isOpen) loadComments(postId, postEl.querySelector(".comments-list"));
     });
  
@@ -368,4 +368,3 @@ document.addEventListener("DOMContentLoaded", () => {
   loadPosts();
  
 });
- 

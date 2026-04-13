@@ -419,3 +419,13 @@ body {
     padding: 18px;
   }
 }
+
+.comment-section {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.35s ease;
+}
+
+.comment-section.open {
+  max-height: 1000px;
+}
