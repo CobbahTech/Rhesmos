@@ -176,7 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ${buildMediaHTML(data.mediaURL)}
       </div>
       <div class="post-actions">
-        <button class="like-btn" data-id="${postId}">❤️ <span class="like-count">${data.likes || 0}</span></button>
+        <button class="like-btn" data-id="${postId}">💙 <span class="like-count">${data.likes || 0}</span></button>
         <button class="comment-btn" data-id="${postId}">💬 <span class="comment-count">0</span></button>
       </div>
       <div class="comment-section" data-id="${postId}" style="margin-top:10px;">
