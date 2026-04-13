@@ -1,6 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
  
   // =========================
+  // CLOUDINARY CONFIG
+  // =========================
+  const CLOUDINARY_CLOUD_NAME  = "dextyw0r3";
+  const CLOUDINARY_UPLOAD_PRESET = "fb62qodk";
+ 
+  // =========================
   // USER SETUP (handled in spill.html)
   // =========================
   const username   = localStorage.getItem("spillUsername");
@@ -58,10 +64,32 @@ document.addEventListener("DOMContentLoaded", () => {
   function buildMediaHTML(url) {
     if (!url) return "";
     const safeURL = escapeHTML(url);
-    if (/\.(mp4|mov|webm)$/i.test(url)) {
+    if (/\.(mp4|mov|webm)$/i.test(url) || url.includes("/video/upload/")) {
       return `<video src="${safeURL}" controls style="max-width:100%;border-radius:8px;margin-top:10px;"></video>`;
     }
     return `<img src="${safeURL}" alt="Spill image" style="max-width:100%;border-radius:8px;margin-top:10px;">`;
+  }
+ 
+  // =========================
+  // CLOUDINARY UPLOAD
+  // =========================
+  async function uploadToCloudinary(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+ 
+    const resourceType = file.type.startsWith("video/") ? "video" : "image";
+    const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`;
+ 
+    const response = await fetch(url, {
+      method: "POST",
+      body: formData
+    });
+ 
+    if (!response.ok) throw new Error("Cloudinary upload failed");
+ 
+    const data = await response.json();
+    return data.secure_url;
   }
  
   // =========================
@@ -73,9 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (file) {
       try {
         if (postBtn) { postBtn.textContent = "Uploading..."; postBtn.disabled = true; }
-        const storageRef = firebase.storage().ref(`spills/${Date.now()}_${file.name}`);
-        await storageRef.put(file);
-        mediaURL = await storageRef.getDownloadURL();
+        mediaURL = await uploadToCloudinary(file);
       } catch (error) {
         console.error("Upload error:", error);
         alert("Media upload failed. Posting text only.");
@@ -342,3 +368,4 @@ document.addEventListener("DOMContentLoaded", () => {
   loadPosts();
  
 });
+ 
