@@ -12,13 +12,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const username = localStorage.getItem("spillUsername");
   let userAvatar = localStorage.getItem("spillAvatar");
  
-  // If saved avatar is a local file path (not a full URL), discard it
   if (userAvatar && !userAvatar.startsWith("http")) {
     localStorage.removeItem("spillAvatar");
     userAvatar = null;
   }
  
-  // Generate fresh DiceBear avatar if none exists
   if (!userAvatar && username) {
     userAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(username)}`;
     localStorage.setItem("spillAvatar", userAvatar);
@@ -93,11 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const resourceType = file.type.startsWith("video/") ? "video" : "image";
     const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`;
  
-    const response = await fetch(url, {
-      method: "POST",
-      body: formData
-    });
- 
+    const response = await fetch(url, { method: "POST", body: formData });
     if (!response.ok) throw new Error("Cloudinary upload failed");
  
     const data = await response.json();
@@ -215,7 +209,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
  
-    // Comment toggle — smooth open/close via CSS class
+    // Comment toggle
     postEl.querySelector(".comment-btn").addEventListener("click", () => {
       const section = postEl.querySelector(".comment-section");
       const isOpen  = section.classList.contains("open");
@@ -243,7 +237,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
  
-    // Load comment count on render
     loadCommentCount(postId, postEl);
  
     return postEl;
@@ -263,7 +256,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
  
   // =========================
-  // LOAD COMMENTS
+  // LOAD COMMENTS (with replies)
   // =========================
   function loadComments(postId, listEl) {
     if (!listEl) return;
@@ -277,25 +270,119 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
         snap.forEach((doc) => {
-          const c = doc.data();
+          const c          = doc.data();
+          const commentId  = doc.id;
           const commentAvatar = escapeHTML(
             c.avatar ||
             `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(c.username || "anon")}`
           );
+ 
           const el = document.createElement("div");
-          el.style.cssText = `display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;padding:8px;background:var(--bg-color);border-radius:8px;`;
+          el.className = "comment-item";
+          el.dataset.commentId = commentId;
           el.innerHTML = `
-            <img src="${commentAvatar}" alt="Avatar"
-              style="width:28px;height:28px;border-radius:50%;object-fit:cover;">
-            <div>
-              <strong style="font-size:13px;color:var(--accent);">${escapeHTML(c.username || "Anonymous")}</strong>
-              <p style="margin:2px 0 0;font-size:14px;color:var(--text-color);">${escapeHTML(c.text)}</p>
+            <div style="display:flex;gap:8px;align-items:flex-start;padding:8px;background:var(--bg-color);border-radius:8px;">
+              <img src="${commentAvatar}" alt="Avatar"
+                style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;">
+              <div style="flex:1;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <strong style="font-size:13px;color:var(--accent);">${escapeHTML(c.username || "Anonymous")}</strong>
+                  <span style="font-size:11px;color:var(--muted);">${formatTime(c.createdAt)}</span>
+                </div>
+                <p style="margin:2px 0 4px;font-size:14px;color:var(--text-color);">${escapeHTML(c.text)}</p>
+                <button class="reply-toggle-btn" style="font-size:12px;color:var(--muted);background:none;border:none;cursor:pointer;padding:0;">
+                  💬 Reply
+                </button>
+                <div class="reply-box" style="display:none;margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
+                  <input type="text" class="reply-input" placeholder="Reply to ${escapeHTML(c.username || "Anonymous")}..."
+                    style="flex:1;min-width:0;padding:6px 10px;border-radius:8px;border:1px solid var(--border-color);
+                           background:var(--bg-color);color:var(--text-color);font-size:13px;">
+                  <button class="submit-reply"
+                    style="padding:6px 12px;background:var(--accent);color:white;border:none;
+                           border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;">Send</button>
+                </div>
+                <div class="replies-list" style="margin-top:6px;padding-left:8px;border-left:2px solid var(--border-color);"></div>
+              </div>
             </div>
           `;
+ 
+          // Hide reply box initially
+          el.querySelector(".reply-box").style.display = "none";
+ 
+          // Toggle reply box
+          el.querySelector(".reply-toggle-btn").addEventListener("click", () => {
+            const box = el.querySelector(".reply-box");
+            const isOpen = box.style.display !== "none";
+            box.style.display = isOpen ? "none" : "flex";
+            if (!isOpen) el.querySelector(".reply-input").focus();
+          });
+ 
+          // Submit reply
+          el.querySelector(".submit-reply").addEventListener("click", async () => {
+            const input     = el.querySelector(".reply-input");
+            const replyText = input.value.trim();
+            if (!replyText) return;
+            try {
+              await db.collection("posts").doc(postId)
+                .collection("comments").doc(commentId)
+                .collection("replies").add({
+                  username:  username,
+                  avatar:    userAvatar,
+                  text:      replyText,
+                  createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+              input.value = "";
+              el.querySelector(".reply-box").style.display = "none";
+              loadReplies(postId, commentId, el.querySelector(".replies-list"));
+            } catch (err) {
+              console.error("Reply error:", err);
+            }
+          });
+ 
           listEl.appendChild(el);
+ 
+          // Load existing replies
+          loadReplies(postId, commentId, el.querySelector(".replies-list"));
         });
       })
       .catch((err) => console.error("Comments load error:", err));
+  }
+ 
+  // =========================
+  // LOAD REPLIES
+  // =========================
+  function loadReplies(postId, commentId, repliesEl) {
+    if (!repliesEl) return;
+    db.collection("posts").doc(postId)
+      .collection("comments").doc(commentId)
+      .collection("replies")
+      .orderBy("createdAt", "asc")
+      .get()
+      .then(snap => {
+        repliesEl.innerHTML = "";
+        snap.forEach(doc => {
+          const r = doc.data();
+          const replyAvatar = escapeHTML(
+            r.avatar ||
+            `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(r.username || "anon")}`
+          );
+          const replyEl = document.createElement("div");
+          replyEl.style.cssText = "display:flex;gap:6px;align-items:flex-start;margin-top:6px;";
+          replyEl.innerHTML = `
+            <img src="${replyAvatar}" alt="Avatar"
+              style="width:22px;height:22px;border-radius:50%;object-fit:cover;flex-shrink:0;">
+            <div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <strong style="font-size:12px;color:var(--accent);">${escapeHTML(r.username || "Anonymous")}</strong>
+                <span style="font-size:11px;color:var(--muted);">${formatTime(r.createdAt)}</span>
+              </div>
+              <p style="margin:1px 0 0;font-size:13px;color:var(--text-color);">${escapeHTML(r.text)}</p>
+            </div>
+          `;
+          repliesEl.appendChild(replyEl);
+        });
+      })
+      .catch(() => {});
   }
  
   // =========================
@@ -327,15 +414,11 @@ document.addEventListener("DOMContentLoaded", () => {
         feed.appendChild(fragment);
       }
  
-      // Hide skeleton and reveal the real feed
       if (typeof window.hideSkeleton === "function") window.hideSkeleton();
  
     }, (error) => {
       console.error("Snapshot error:", error);
- 
-      // Hide skeleton even on error so the page doesn't stay stuck
       if (typeof window.hideSkeleton === "function") window.hideSkeleton();
- 
       if (feed && error.code === "permission-denied") {
         feed.innerHTML = `
           <p style="text-align:center;color:var(--muted);margin-top:40px;">

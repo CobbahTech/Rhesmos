@@ -429,3 +429,17 @@ body {
 .comment-section.open {
   max-height: 1000px;
 }
+
+.reply-box {
+  display: none;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.reply-toggle-btn:hover {
+  color: var(--accent) !important;
+}
+
+.comment-item {
+  margin-bottom: 12px;
+}
