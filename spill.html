@@ -54,17 +54,6 @@
  
   <!-- User Setup -->
   <script>
-    const avatars = [
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Mia",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Zoe",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Sam",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Luna",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Nova",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Aria"
-    ];
- 
     const adjectives = ["Silent", "Crazy", "Happy", "Blue", "Electric"];
     const nouns      = ["Penguin", "Tiger", "Banana", "Rocket", "Wizard"];
  
@@ -85,7 +74,8 @@
     if (avatarElem) {
       let userAvatar = localStorage.getItem("spillAvatar");
       if (!userAvatar) {
-        userAvatar = avatars[Math.floor(Math.random() * avatars.length)];
+        // Generate a unique avatar from the username as seed — no local files needed
+        userAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(username)}`;
         localStorage.setItem("spillAvatar", userAvatar);
       }
       avatarElem.src = userAvatar;

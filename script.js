@@ -1,32 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
  
   // =========================
-  // USER SETUP
+  // USER SETUP (handled in spill.html)
   // =========================
-  const avatars = [
-    'images/1.jpg','images/2.jpg','images/3.jpg','images/4.jpg',
-    'images/5.jpg','images/6.jpg','images/6.webp','images/7.webp',
-    'images/8.webp','images/11.jpg'
-  ];
- 
-  const adjectives = ["Silent","Crazy","Happy","Blue","Electric"];
-  const nouns      = ["Penguin","Tiger","Banana","Rocket","Wizard"];
- 
-  let username = localStorage.getItem("spillUsername");
-  if (!username) {
-    const randomNumber = Math.floor(Math.random() * 100);
-    username =
-      adjectives[Math.floor(Math.random() * adjectives.length)] +
-      nouns[Math.floor(Math.random() * nouns.length)] +
-      randomNumber;
-    localStorage.setItem("spillUsername", username);
-  }
- 
-  let userAvatar = localStorage.getItem("spillAvatar");
-  if (!userAvatar) {
-    userAvatar = avatars[Math.floor(Math.random() * avatars.length)];
-    localStorage.setItem("spillAvatar", userAvatar);
-  }
+  const username   = localStorage.getItem("spillUsername");
+  const userAvatar = localStorage.getItem("spillAvatar");
  
   const usernameEl = document.getElementById("username");
   const avatarEl   = document.getElementById("user-avatar");
@@ -56,19 +34,16 @@ document.addEventListener("DOMContentLoaded", () => {
     return div.innerHTML;
   }
  
-  // ✅ KEY FIX: createdAt is NULL on the first local snapshot after posting
-  // (Firestore hasn't confirmed the server timestamp yet).
-  // We must check typeof .toDate before calling it — never assume it's a Timestamp.
   function formatTime(timestamp) {
     if (!timestamp) return "Just now";
  
     let date;
     if (typeof timestamp.toDate === "function") {
-      date = timestamp.toDate();       // Firestore Timestamp
+      date = timestamp.toDate();
     } else if (timestamp instanceof Date) {
-      date = timestamp;                // plain JS Date
+      date = timestamp;
     } else {
-      return "Just now";               // unknown — safe fallback
+      return "Just now";
     }
  
     const now  = new Date();
@@ -140,13 +115,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const data   = doc.data();
     const postId = doc.id;
  
-    // ✅ KEY FIX: Only delete expired posts if expiresAt is a real Timestamp (not null)
     if (
       data.expiresAt &&
       typeof data.expiresAt.toDate === "function" &&
       data.expiresAt.toDate() < new Date()
     ) {
-      doc.ref.delete().catch(() => {}); // silently ignore permission errors
+      doc.ref.delete().catch(() => {});
       return null;
     }
  
@@ -154,7 +128,11 @@ document.addEventListener("DOMContentLoaded", () => {
     postEl.className = "post";
     postEl.dataset.id = postId;
  
-    const authorAvatar = escapeHTML(data.avatar || "images/1.jpg");
+    // Fallback avatar uses the same DiceBear style, seeded by username
+    const authorAvatar = escapeHTML(
+      data.avatar ||
+      `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(data.username || "anon")}`
+    );
  
     postEl.innerHTML = `
       <div class="post-header">
@@ -246,10 +224,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         snap.forEach((doc) => {
           const c = doc.data();
+          // Fallback avatar uses DiceBear seeded by commenter's username
+          const commentAvatar = escapeHTML(
+            c.avatar ||
+            `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(c.username || "anon")}`
+          );
           const el = document.createElement("div");
           el.style.cssText = `display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;padding:8px;background:var(--bg-color);border-radius:8px;`;
           el.innerHTML = `
-            <img src="${escapeHTML(c.avatar || "images/1.jpg")}" alt="Avatar"
+            <img src="${commentAvatar}" alt="Avatar"
               style="width:28px;height:28px;border-radius:50%;object-fit:cover;">
             <div>
               <strong style="font-size:13px;color:var(--accent);">${escapeHTML(c.username || "Anonymous")}</strong>
