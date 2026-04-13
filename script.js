@@ -314,8 +314,16 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         feed.appendChild(fragment);
       }
+ 
+      // Hide skeleton and reveal the real feed
+      if (typeof window.hideSkeleton === "function") window.hideSkeleton();
+ 
     }, (error) => {
       console.error("Snapshot error:", error);
+ 
+      // Hide skeleton even on error so the page doesn't stay stuck
+      if (typeof window.hideSkeleton === "function") window.hideSkeleton();
+ 
       if (feed && error.code === "permission-denied") {
         feed.innerHTML = `
           <p style="text-align:center;color:var(--muted);margin-top:40px;">
