@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rhesmos - Donate</title>
+  <link rel="stylesheet" href="intro.css">
+</head>
+ 
+<body class="intro-active">
+ 
+  <div id="intro-screen">
+    <div class="intro-content">
+ 
+      <!-- Logo -->
+      <img src="images/Rhesmos.jpg" alt="Rhesmos Logo" class="logo">
+ 
+      <!-- Title -->
+      <h1>Support Rhesmos</h1>
+ 
+      <!-- Message -->
+      <p>
+        Thank you for helping support the <strong>Rhesmos</strong> community!<br><br>
+        Your contributions help us keep the platform running and improve it for everyone.<br><br>
+        All donations are processed securely via Mobile Money.
+      </p>
+ 
+      <!-- Buttons -->
+      <div class="intro-buttons">
+        <button id="donate-btn">Donate with Mobile Money</button>
+        <button id="leave-btn">← Back to Rhesmos</button>
+      </div>
+ 
+    </div>
+  </div>
+ 
+  <!-- Paystack Script -->
+  <script src="https://js.paystack.co/v1/inline.js"></script>
+ 
+  <script>
+    const donateBtn = document.getElementById("donate-btn");
+    const leaveBtn  = document.getElementById("leave-btn");
+ 
+    // Back button
+    leaveBtn.addEventListener("click", () => {
+      window.location.href = "spill.html";
+    });
+ 
+    // Donate button
+    donateBtn.addEventListener("click", () => {
+ 
+      // Get username from localStorage
+      const username  = localStorage.getItem("spillUsername") || "anonymous";
+      const userEmail = `${username.toLowerCase()}@spill.com`;
+ 
+      // Ask user for donation amount
+      const input = prompt("How much would you like to donate?\nMinimum: ₵1", "5");
+ 
+      // User cancelled the prompt
+      if (input === null) return;
+ 
+      const amountGHS = parseFloat(input);
+ 
+      // Validate input
+      if (isNaN(amountGHS) || amountGHS < 1) {
+        alert("❌ Minimum donation amount is ₵1. Please try again.");
+        return;
+      }
+ 
+      // Convert to pesewas (Paystack requirement)
+      const amountInPesewas = Math.round(amountGHS * 100);
+ 
+      // Paystack setup
+      const handler = PaystackPop.setup({
+        key: "pk_live_567e25cf90b28e526cb7a3870217275be3b52eb5",
+        email:    userEmail,
+        amount:   amountInPesewas,
+        currency: "GHS",
+        channels: ["mobile_money"],
+ 
+        callback: function(response) {
+          alert(`✅ Thank you!\n\nDonation of ₵${amountGHS.toFixed(2)} was successful!\nReference: ${response.reference}`);
+        },
+ 
+        onClose: function() {
+          alert("Payment window closed. No charge was made.");
+        }
+      });
+ 
+      handler.openIframe();
+    });
+  </script>
+ 
+</body>
+</html>
