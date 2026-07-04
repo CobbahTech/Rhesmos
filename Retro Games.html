@@ -3,32 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rhesmos - Donate</title>
+  <meta name="description" content="Rhesmos - Retro Games section coming soon.">
+  <title>Rhesmos - Retro Games</title>
   <link rel="stylesheet" href="intro.css">
 </head>
- 
 <body class="intro-active">
  
   <div id="intro-screen">
     <div class="intro-content">
  
-      <!-- Logo -->
       <img src="images/Rhesmos.png" alt="Rhesmos Logo" class="logo">
  
-      <!-- Title -->
-      <h1>Support Rhesmos</h1>
+      <h1>Rhesmos - Retro Games</h1>
  
-      <!-- Message -->
       <p>
-        Thank you for helping support the <strong>Rhesmos</strong> community!<br><br>
-        Your contributions help us keep the platform running and improve it for everyone.<br><br>
-        All donations are processed securely via Mobile Money.
+        This part of <strong>Rhesmos</strong> is still under construction.<br><br>
+        Check back regularly for updates.<br><br>
+        You can also help support the Rhesmos community to maintain and improve this site.
       </p>
  
-      <!-- Buttons -->
       <div class="intro-buttons">
-        <button id="donate-btn">Donate with Mobile Money</button>
-        <button id="leave-btn">← Back to Rhesmos</button>
+        <button id="donate-btn">💙 Donate</button>
+        <button id="leave-btn">← Back</button>
       </div>
  
     </div>
@@ -88,6 +84,10 @@
       });
  
       handler.openIframe();
+    });
+
+    document.getElementById("leave-btn").addEventListener("click", () => {
+      window.location.href = "spill.html";
     });
   </script>
  
