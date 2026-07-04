@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spill</title>
+  <title>Rhesmos</title>
   <link rel="stylesheet" href="style.css">
   <style>
     /* ── Skeleton wrapper ── */
@@ -94,14 +94,14 @@
       <img id="user-avatar" src="" alt="Avatar">
       <span id="username"></span>
     </div>
-    <button id="spill-button">Spill Something</button>
+    <button id="spill-button">Post</button>
     <button id="theme-toggle">🌙</button>
   </header>
  
   <!-- Spill Modal -->
   <div id="spill-modal" class="modal">
     <div class="modal-content">
-      <h3>What do you want to spill?</h3>
+      <h3>What do you want to post?</h3>
       <textarea id="spill-text" placeholder="Type something..."></textarea>
       <input type="file" id="media-input" accept="image/*,video/*">
       <div class="modal-actions">
@@ -114,19 +114,9 @@
   <!-- Categories -->
   <div class="categories">
     <button class="active"       onclick="window.location.href='spill.html'">All</button>
-    <button onclick="window.location.href='funny.html'">Funny</button>
-    <button onclick="window.location.href='anime.html'">Anime</button>
-    <button onclick="window.location.href='rant.html'">Rant</button>
-    <button onclick="window.location.href='advice.html'">Advice</button>
-    <button onclick="window.location.href='highschool.html'">HighSchool</button>
-    <button onclick="window.location.href='teenvibes.html'">TeenVibes</button>
-    <button onclick="window.location.href='adult.html'">Adult</button>
-    <button onclick="window.location.href='sports.html'">Sports</button>
-    <button onclick="window.location.href='politics.html'">Politics</button>
-    <button onclick="window.location.href='gaming.html'">Gaming</button>
-    <button onclick="window.location.href='memes.html'">Memes</button>
-    <button onclick="window.location.href='weapons.html'">Weapons</button>
-    <button onclick="window.location.href='religion.html'">Religion</button>
+    <button onclick="window.location.href='Anime & Manga.html'">Anime & Manga</button>
+    <button onclick="window.location.href='Sports.html'">Sports</button>
+    <button onclick="window.location.href='Technology.html'">Technology</button>
   </div>
  
   <!-- Skeleton Screen -->
@@ -184,8 +174,8 @@
  
   <!-- User Setup -->
   <script>
-    const adjectives = ["Silent", "Crazy", "Happy", "Blue", "Electric"];
-    const nouns      = ["Penguin", "Tiger", "Banana", "Rocket", "Wizard"];
+    const adjectives = ["Phantom", "Crazy", "Horny", "Wet", "Electric"];
+    const nouns      = ["Meat", "Shoe", "Banana", "Ass", "Beard"];
  
     let username = localStorage.getItem("spillUsername");
     if (!username) {
