@@ -133,3 +133,14 @@ body.intro-active {
   background: #222;
   color: #fff;
 }
+
+.rules-link {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  transition: opacity 0.2s ease;
+}
+
+.rules-link:hover {
+  opacity: 0.75;
+}
