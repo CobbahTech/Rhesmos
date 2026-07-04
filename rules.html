@@ -1,51 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rhesmos - Rules</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rhesmos — Rules</title>
 
-  <link rel="stylesheet" href="intro.css">
+  <link rel="stylesheet" href="intro.css"/>
 
   <style>
-    /* Rules section */
-    .rules-list {
-      text-align: left;
-      margin: 25px 0;
+
+    body.intro-active {
+      overflow-y: auto;
+      height: auto;
     }
 
-    .rules-list h3 {
+    #intro-screen {
+      position: relative;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .intro-content {
+      max-width: 680px;
+      margin: 0 auto;
       text-align: center;
-      margin-bottom: 15px;
+    }
+   
+    .rules-list {
+      text-align: left;
+      margin: 0 0 24px 0;
     }
 
     .rules-list ul {
-      padding-left: 25px;
+      list-style: none;
+      padding: 0;
       margin: 0;
     }
 
     .rules-list li {
-      margin-bottom: 12px;
-      line-height: 1.6;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.65;
+      color: #cfd9de;
+      margin-bottom: 4px;
+      transition: background 0.15s ease;
     }
 
-    /* Make room for all rules */
-    .intro-content {
-      max-width: 900px;
-      height: auto;
-      padding: 40px;
+    .rules-list li:hover {
+      background: rgba(29,155,240,0.06);
     }
 
-    /* Blue primary button */
+    .rules-list li strong {
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    
+
+    /* Enter button override — keep blue from intro.css */
     #enter-btn {
-      background: #2563eb;
+      background: #1d9bf0;
       color: #fff;
       border: none;
-      transition: background 0.2s ease;
+      transition: background 0.2s ease, transform 0.2s ease;
     }
 
     #enter-btn:hover {
-      background: #1d4ed8;
+      background: #1a8cd8;
+      transform: scale(1.03);
     }
   </style>
 </head>
@@ -56,50 +82,80 @@
   <div class="intro-content">
 
     <!-- Logo -->
-    <img src="images/Rhesmos.png" alt="Rhesmos Logo" class="logo">
+    <img src="images/Rhesmos.png" alt="Rhesmos Logo" class="logo"/>
 
-    <h1>Rhesmos Rules</h1>
+    <!-- Page heading -->
+    <h1>Community Rules</h1>
 
     <p>
-      By using Rhesmos, you agree to follow these community rules.
-      They exist to keep discussions open, respectful, and enjoyable for everyone.
+      By entering Rhesmos, you agree to follow these rules.
+      They exist to keep discussions open, raw, and safe for everyone.
     </p>
 
+    <hr class="rule-divider"/>
     <div class="rules-list">
-
-      <h3>Global Rules</h3>
-
       <ul>
-        <li>Follow all applicable laws.</li>
-        <li>You must be at least <strong>18 years old</strong> to use Rhesmos.</li>
-        <li>Do not post child sexual abuse material or exploitative content.</li>
-        <li>Do not post personal information (doxxing) or encourage harassment or raids.</li>
-        <li>No threats of violence or promotion of illegal activities.</li>
-        <li>No spam, flooding, scams, or excessive advertising.</li>
-        <li>Do not impersonate moderators, administrators, or other users.</li>
-        <li>Keep posts relevant to the board you're posting on.</li>
-        <li>Avoid low-quality spam, repeated copypasta, gibberish, or duplicate threads.</li>
-        <li>Do not abuse the reporting system.</li>
-        <li>Do not attempt to evade bans or moderation actions.</li>
-        <li>No bots or automated posting unless explicitly authorized.</li>
-        <li>Do not upload malware or malicious files.</li>
+        <li>
+          <span class="rule-num">01</span>
+          Follow all applicable local and international laws.
+        </li>
+        <li>
+          <span class="rule-num">02</span>
+          You must be at least <strong>18 years old</strong> to use Rhesmos.
+        </li>
+        <li>
+          <span class="rule-num">03</span>
+          Do not post child sexual abuse material or any exploitative content involving minors.
+        </li>
+        <li>
+          <span class="rule-num">04</span>
+          Do not post personal information (doxxing), encourage harassment, or organize raids.
+        </li>
+        <li>
+          <span class="rule-num">05</span>
+          No threats of violence or promotion of illegal activities toward any person or group.
+        </li>
+        <li>
+          <span class="rule-num">06</span>
+          No spam, flooding, scams, or unsolicited advertising of any kind.
+        </li>
+        <li>
+          <span class="rule-num">07</span>
+          Do not impersonate moderators, administrators, or other users.
+        </li>
+        <li>
+          <span class="rule-num">08</span>
+          Keep posts relevant to the board or thread you are posting on.
+        </li>
+        <li>
+          <span class="rule-num">09</span>
+          Avoid low-quality spam, repeated copypasta, gibberish, or duplicate threads.
+        </li>
+        <li>
+          <span class="rule-num">10</span>
+          Do not abuse the reporting system or use it to silence others.
+        </li>
+        <li>
+          <span class="rule-num">11</span>
+          Do not attempt to evade bans or circumvent moderation actions.
+        </li>
+        <li>
+          <span class="rule-num">12</span>
+          No bots or automated posting unless explicitly authorized by admins.
+        </li>
+        <li>
+          <span class="rule-num">13</span>
+          Do not upload malware, malicious scripts, or harmful files of any kind.
+        </li>
       </ul>
-
-      <p class="warning">
-        Anonymous speech comes with responsibility. Rhesmos reserves the right
-        to remove content or suspend access when necessary to protect the
-        community or comply with legal obligations.
-      </p>
-
     </div>
 
+    <hr class="rule-divider"/>
     <div class="intro-buttons">
       <button id="enter-btn" onclick="location.href='spill.html'">
         Enter Rhesmos
       </button>
     </div>
-
-  </div>
 </div>
 
 </body>
